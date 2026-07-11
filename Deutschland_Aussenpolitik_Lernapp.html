@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deutschlands Außenpolitik 1990–2009 – Interaktives Lernen</title>
+  <style>
+    :root {
+      --bg: #0f1c2e;
+      --card: #1a2d47;
+      --card-hover: #223a5c;
+      --accent: #3d8fd9;
+      --accent-light: #6eb3f7;
+      --success: #2ecc71;
+      --error: #e74c3c;
+      --warn: #f39c12;
+      --text: #eef4fb;
+      --muted: #9bb4d0;
+      --border: #2e4a6e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    header {
+      background: linear-gradient(135deg, #1a3a5c 0%, #0f1c2e 100%);
+      padding: 1.5rem 2rem;
+      border-bottom: 2px solid var(--accent);
+    }
+    header h1 { font-size: 1.5rem; margin-bottom: 0.3rem; }
+    header p { color: var(--muted); font-size: 0.95rem; }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+    nav button {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    nav button:hover, nav button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    main { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    .panel { display: none; animation: fadeIn 0.3s ease; }
+    .panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .card h2 { font-size: 1.2rem; margin-bottom: 1rem; color: var(--accent-light); }
+    .card h3 { font-size: 1rem; margin: 1rem 0 0.5rem; color: var(--muted); }
+    .leitfrage {
+      background: rgba(61, 143, 217, 0.15);
+      border-left: 4px solid var(--accent);
+      padding: 1rem 1.2rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+  /* Timeline */
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 0.4rem;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--border);
+      border-radius: 2px;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 1.2rem;
+      padding: 1rem;
+      background: var(--card-hover);
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -1.65rem;
+      top: 1.2rem;
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+    }
+    .timeline-item:hover { border-color: var(--accent); }
+    .timeline-item.open { border-color: var(--accent); }
+    .timeline-year { font-weight: bold; color: var(--accent-light); font-size: 0.9rem; }
+    .timeline-title { font-weight: 600; margin: 0.3rem 0; }
+    .timeline-detail {
+      display: none;
+      margin-top: 0.8rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .timeline-item.open .timeline-detail { display: block; }
+  /* Flashcards */
+    .flashcard-container { perspective: 1000px; margin: 1.5rem 0; }
+    .flashcard {
+      width: 100%;
+      min-height: 180px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+      cursor: pointer;
+    }
+    .flashcard.flipped { transform: rotateY(180deg); }
+    .flashcard-face {
+      position: absolute;
+      width: 100%;
+      min-height: 180px;
+      backface-visibility: hidden;
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .flashcard-front { background: var(--card-hover); }
+    .flashcard-back {
+      background: var(--card);
+      transform: rotateY(180deg);
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+    .flashcard-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+    }
+    .flashcard-nav button {
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .flashcard-nav button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .flashcard-counter { color: var(--muted); font-size: 0.9rem; }
+  /* Matching */
+    .match-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 600px) { .match-grid { grid-template-columns: 1fr; } }
+    .match-col h3 { font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--muted); }
+    .match-item {
+      padding: 0.8rem 1rem;
+      background: var(--card-hover);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+    .match-item:hover { border-color: var(--accent); }
+    .match-item.selected { border-color: var(--accent); background: rgba(61, 143, 217, 0.2); }
+    .match-item.correct { border-color: var(--success); background: rgba(46, 204, 113, 0.15); }
+    .match-item.wrong { border-color: var(--error); background: rgba(231, 76, 60, 0.15); }
+    .match-item.matched { opacity: 0.5; pointer-events: none; }
+    .match-feedback { margin-top: 1rem; padding: 1rem; border-radius: 8px; display: none; }
+    .match-feedback.show { display: block; }
+    .match-feedback.success { background: rgba(46, 204, 113, 0.2); border: 1px solid var(--success); }
+  /* Quiz */
+    .quiz-question { margin-bottom: 1.5rem; }
+    .quiz-question p { margin-bottom: 0.8rem; font-weight: 500; }
+    .quiz-options label {
+      display: block;
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.5rem;
+      background: var(--card-hover);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quiz-options label:hover { border-color: var(--accent); }
+    .quiz-options input { display: none; }
+    .quiz-options input:checked + span { color: var(--accent-light); }
+    .quiz-options label.correct { border-color: var(--success); background: rgba(46, 204, 113, 0.15); }
+    .quiz-options label.wrong { border-color: var(--error); background: rgba(231, 76, 60, 0.15); }
+    .btn {
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 0.7rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+    }
+    .btn:hover { background: var(--accent-light); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .score-box {
+      text-align: center;
+      padding: 2rem;
+      background: var(--card-hover);
+      border-radius: 12px;
+      margin-top: 1rem;
+      display: none;
+    }
+    .score-box.show { display: block; }
+    .score-box .score { font-size: 2.5rem; font-weight: bold; color: var(--accent-light); }
+    .progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Die internationale Rolle Deutschlands nach der Wiedervereinigung</h1>
+    <p>1990–2009 · Interaktives Lernprodukt</p>
+  </header>
+
+  <nav>
+    <button class="active" data-panel="overview">Überblick</button>
+    <button data-panel="timeline">Zeitstrahl</button>
+    <button data-panel="flashcards">Karteikarten</button>
+    <button data-panel="matching">Zuordnung</button>
+    <button data-panel="quiz">Quiz</button>
+  </nav>
+
+  <main>
+    <!-- ÜBERBLICK -->
+    <section id="overview" class="panel active">
+      <div class="leitfrage">
+        <strong>Leitfrage:</strong> Wie zeigte sich die veränderte außenpolitische Bedeutung der Bundesrepublik Deutschland nach der Wiedervereinigung?
+      </div>
+      <div class="card">
+        <h2>Kernpunkte zum Merken</h2>
+        <h3>Ausgangslage (1990)</h3>
+        <p>Deutschland wieder souverän → neue Rolle in der Welt definieren. Ziele: Peacebuilding, Demokratie, Zusammenarbeit mit UNO, NATO, EU.</p>
+        <h3>Out-of-Area (1994)</h3>
+        <p>BVerfG: Auslandseinsätze erlaubt, wenn NATO/UNO + Bundestag zustimmt.</p>
+        <h3>Kosovo (1998–1999)</h3>
+        <p>Erster Kampfeinsatz der Bundeswehr seit 1945. KFOR-Friedensmission danach.</p>
+        <h3>Irakkrieg (2003)</h3>
+        <p>Deutschland lehnt ab (kein UNO-Mandat). Starke innenpolitische Zustimmung. Zeigt Eigenständigkeit.</p>
+        <h3>Reaktionen</h3>
+        <p>Schröder: Ablehnung · Merkel: Kritik (Isolation) · Pau: Ablehnung · Mützenich: Diplomatie + gesellschaftliche Akzeptanz</p>
+      </div>
+      <p style="color: var(--muted); font-size: 0.9rem;">Nutze die Tabs oben, um interaktiv zu lernen.</p>
+    </section>
+
+    <!-- ZEITSTRAHL -->
+    <section id="timeline" class="panel">
+      <div class="card">
+        <h2>Zeitstrahl – Klicke auf ein Ereignis</h2>
+        <div class="timeline" id="timeline"></div>
+      </div>
+    </section>
+
+    <!-- KARTEIKARTEN -->
+    <section id="flashcards" class="panel">
+      <div class="card">
+        <h2>Karteikarten – Klicke zum Umdrehen</h2>
+        <div class="flashcard-container">
+          <div class="flashcard" id="flashcard">
+            <div class="flashcard-face flashcard-front" id="fc-front"></div>
+            <div class="flashcard-face flashcard-back" id="fc-back"></div>
+          </div>
+        </div>
+        <div class="flashcard-nav">
+          <button id="fc-prev" disabled>← Zurück</button>
+          <span class="flashcard-counter" id="fc-counter">1 / 8</span>
+          <button id="fc-next">Weiter →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZUORDNUNG -->
+    <section id="matching" class="panel">
+      <div class="card">
+        <h2>Zuordnung – Verbinde Person mit Position</h2>
+        <p style="margin-bottom: 1rem; color: var(--muted); font-size: 0.9rem;">Klicke zuerst eine Person, dann die passende Aussage.</p>
+        <div class="match-grid">
+          <div class="match-col">
+            <h3>Personen</h3>
+            <div id="match-left"></div>
+          </div>
+          <div class="match-col">
+            <h3>Positionen</h3>
+            <div id="match-right"></div>
+          </div>
+        </div>
+        <div class="match-feedback" id="match-feedback"></div>
+        <button class="btn" id="match-reset" style="margin-top: 1rem; display: none;">Nochmal versuchen</button>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" class="panel">
+      <div class="card">
+        <h2>Quiz – Teste dein Wissen</h2>
+        <div class="progress-bar"><div class="progress-fill" id="quiz-progress" style="width: 0%"></div></div>
+        <div id="quiz-container"></div>
+        <button class="btn" id="quiz-submit" style="display: none;">Auswerten</button>
+        <div class="score-box" id="score-box">
+          <div class="score" id="score-text">0 / 8</div>
+          <p id="score-message"></p>
+          <button class="btn" id="quiz-retry" style="margin-top: 1rem;">Quiz wiederholen</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>Quellen: Buch S. 278–283 · Unterrichtsmaterialien · Geschichte W-Seminar</footer>
+
+  <script>
+    // Navigation
+    document.querySelectorAll('nav button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.panel).classList.add('active');
+      });
+    });
+
+    // Timeline data
+    const timelineData = [
+      { year: '1990', title: 'Wiedervereinigung', detail: '3. Oktober: Deutschland wieder vollständig souverän. Neue Rolle in der Welt muss definiert werden. Ziele: Peacebuilding, Demokratie, Zusammenarbeit mit UNO, NATO, EU.' },
+      { year: '1994', title: 'Out-of-Area-Urteil', detail: 'Bundesverfassungsgericht: Auslandseinsätze der Bundeswehr sind erlaubt, wenn sie im Rahmen von NATO oder UNO stattfinden und der Bundestag zustimmt.' },
+      { year: '1998–1999', title: 'Kosovo-Krieg', detail: 'Konflikt Serbien vs. Kosovo-Albaner. NATO greift ein. Deutschland beteiligt sich erstmals seit 1945 an einem Kampfeinsatz. Danach KFOR-Friedensmission.' },
+      { year: '2001', title: '9/11 & Afghanistan', detail: 'Terroranschläge in den USA. Deutschland sichert „uneingeschränkte Solidarität“. Beteiligung an Afghanistan (ISAF) ist umstritten.' },
+      { year: '2003', title: 'Irakkrieg – Ablehnung', detail: 'USA und GB greifen Irak an. Deutschland lehnt ab (kein UNO-Mandat). Innenpolitisch starke Zustimmung. Zeigt außenpolitische Eigenständigkeit.' }
+    ];
+
+    const timelineEl = document.getElementById('timeline');
+    timelineData.forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'timeline-item';
+      div.innerHTML = `<div class="timeline-year">${item.year}</div><div class="timeline-title">${item.title}</div><div class="timeline-detail">${item.detail}</div>`;
+      div.addEventListener('click', () => {
+        document.querySelectorAll('.timeline-item').forEach(t => t.classList.remove('open'));
+        div.classList.add('open');
+      });
+      timelineEl.appendChild(div);
+    });
+
+    // Flashcards
+    const flashcards = [
+      { q: 'Was bedeutet „Out-of-Area“?', a: 'Einsätze der Bundeswehr außerhalb des NATO-Gebiets. Seit 1994 erlaubt, wenn NATO/UNO + Bundestagszustimmung.' },
+      { q: 'Wann war der erste Kampfeinsatz der Bundeswehr seit 1945?', a: 'Kosovo-Krieg 1998–1999. Beteiligung an NATO-Luftangriffen und später KFOR.' },
+      { q: 'Warum lehnte Deutschland den Irakkrieg 2003 ab?', a: 'Kein UNO-Mandat, friedliche Lösung bevorzugt. Starke innenpolitische Unterstützung.' },
+      { q: 'Was ist Peacebuilding?', a: 'Friedenssicherung und Stabilität in Konfliktregionen. Zentrales Ziel deutscher Außenpolitik nach 1990.' },
+      { q: 'Welche drei Organisationen sind zentral?', a: 'UNO (Weltfrieden), NATO (Verteidigung), EU (wirtschaftliche und politische Zusammenarbeit).' },
+      { q: 'Schröders Haltung zum Irakkrieg?', a: 'Ablehnung. Friedliche Entwaffnung, Kooperation mit Frankreich, keine militärische Beteiligung.' },
+      { q: 'Merkels Kritik an Schröder?', a: 'Deutschland isoliere sich international, schwäche NATO, EU und UNO.' },
+      { q: 'Was sagt Mützenich?', a: 'Deutschland wirkt vor allem diplomatisch und wirtschaftlich. Gesellschaftliche Akzeptanz muss in Außenpolitik eingebunden sein.' }
+    ];
+
+    let fcIndex = 0;
+    const fc = document.getElementById('flashcard');
+    const fcFront = document.getElementById('fc-front');
+    const fcBack = document.getElementById('fc-back');
+
+    function updateFlashcard() {
+      fc.classList.remove('flipped');
+      fcFront.textContent = flashcards[fcIndex].q;
+      fcBack.textContent = flashcards[fcIndex].a;
+      document.getElementById('fc-counter').textContent = `${fcIndex + 1} / ${flashcards.length}`;
+      document.getElementById('fc-prev').disabled = fcIndex === 0;
+      document.getElementById('fc-next').disabled = fcIndex === flashcards.length - 1;
+    }
+    fc.addEventListener('click', () => fc.classList.toggle('flipped'));
+    document.getElementById('fc-prev').addEventListener('click', (e) => { e.stopPropagation(); if (fcIndex > 0) { fcIndex--; updateFlashcard(); } });
+    document.getElementById('fc-next').addEventListener('click', (e) => { e.stopPropagation(); if (fcIndex < flashcards.length - 1) { fcIndex++; updateFlashcard(); } });
+    updateFlashcard();
+
+    // Matching
+    const matchPairs = [
+      { person: 'Gerhard Schröder', position: 'Lehnt Irakkrieg ab, setzt auf friedliche Lösung' },
+      { person: 'Angela Merkel', position: 'Kritisiert Schröder – befürchtet Isolation' },
+      { person: 'Petra Pau', position: 'Lehnt Krieg ab – geht um militärische Neuordnung' },
+      { person: 'Rolf Mützenich', position: 'Diplomatie, wirtschaftlicher Einfluss, gesellschaftliche Akzeptanz' }
+    ];
+
+    let selectedLeft = null, matchedCount = 0;
+    const matchLeft = document.getElementById('match-left');
+    const matchRight = document.getElementById('match-right');
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function initMatching() {
+      selectedLeft = null;
+      matchedCount = 0;
+      matchLeft.innerHTML = '';
+      matchRight.innerHTML = '';
+      document.getElementById('match-feedback').classList.remove('show');
+      document.getElementById('match-reset').style.display = 'none';
+
+      matchPairs.forEach((p, i) => {
+        const el = document.createElement('div');
+        el.className = 'match-item';
+        el.textContent = p.person;
+        el.dataset.index = i;
+        el.dataset.side = 'left';
+        el.addEventListener('click', () => selectMatch(el, 'left'));
+        matchLeft.appendChild(el);
+      });
+
+      shuffle(matchPairs.map((p, i) => ({ ...p, index: i }))).forEach(p => {
+        const el = document.createElement('div');
+        el.className = 'match-item';
+        el.textContent = p.position;
+        el.dataset.index = p.index;
+        el.dataset.side = 'right';
+        el.addEventListener('click', () => selectMatch(el, 'right'));
+        matchRight.appendChild(el);
+      });
+    }
+
+    function selectMatch(el, side) {
+      if (el.classList.contains('matched')) return;
+      if (side === 'left') {
+        document.querySelectorAll('#match-left .match-item').forEach(e => e.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedLeft = el;
+      } else if (selectedLeft) {
+        const leftIdx = parseInt(selectedLeft.dataset.index);
+        const rightIdx = parseInt(el.dataset.index);
+        if (leftIdx === rightIdx) {
+          selectedLeft.classList.add('correct', 'matched');
+          el.classList.add('correct', 'matched');
+          matchedCount++;
+          selectedLeft = null;
+          if (matchedCount === matchPairs.length) {
+            const fb = document.getElementById('match-feedback');
+            fb.textContent = '✓ Alle Zuordnungen richtig!';
+            fb.className = 'match-feedback show success';
+            document.getElementById('match-reset').style.display = 'block';
+          }
+        } else {
+          selectedLeft.classList.add('wrong');
+          el.classList.add('wrong');
+          setTimeout(() => {
+            selectedLeft.classList.remove('wrong', 'selected');
+            el.classList.remove('wrong');
+            selectedLeft = null;
+          }, 800);
+        }
+      }
+    }
+    document.getElementById('match-reset').addEventListener('click', initMatching);
+    initMatching();
+
+    // Quiz
+    const quizData = [
+      { q: 'Wann fand die deutsche Wiedervereinigung statt?', options: ['3. Oktober 1989', '3. Oktober 1990', '9. November 1990', '1. Januar 1991'], correct: 1 },
+      { q: 'Was entschied das BVerfG 1994 zu Out-of-Area-Einsätzen?', options: ['Verboten', 'Erlaubt mit NATO/UNO + Bundestag', 'Nur mit UNO-Mandat', 'Nur im EU-Raum'], correct: 1 },
+      { q: 'Welcher Konflikt war der erste Kampfeinsatz der Bundeswehr seit 1945?', options: ['Irakkrieg', 'Afghanistan', 'Kosovo-Krieg', 'Libyen'], correct: 2 },
+      { q: 'Warum lehnte Deutschland den Irakkrieg 2003 ab?', options: ['Kein Geld', 'Kein UNO-Mandat', 'Keine Bundeswehr', 'Russland verbot es'], correct: 1 },
+      { q: 'Wer kritisierte Schröders Irak-Haltung wegen möglicher Isolation?', options: ['Petra Pau', 'Rolf Mützenich', 'Angela Merkel', 'George W. Bush'], correct: 2 },
+      { q: 'Was bedeutet Peacebuilding?', options: ['Waffenexport', 'Friedenssicherung', 'Wirtschaftskrieg', 'Militärische Expansion'], correct: 1 },
+      { q: 'Welche Organisation ist ein Verteidigungsbündnis?', options: ['UNO', 'EU', 'NATO', 'WHO'], correct: 2 },
+      { q: 'Was betont Mützenich für die Außenpolitik?', options: ['Nur Militär', 'Gesellschaftliche Akzeptanz', 'Isolation', 'Waffenstillstand'], correct: 1 }
+    ];
+
+  let quizAnswers = {};
+  const quizContainer = document.getElementById('quiz-container');
+
+  function renderQuiz() {
+    quizAnswers = {};
+    quizContainer.innerHTML = '';
+    document.getElementById('quiz-submit').style.display = 'block';
+    document.getElementById('score-box').classList.remove('show');
+
+    quizData.forEach((item, qIdx) => {
+      const div = document.createElement('div');
+      div.className = 'quiz-question';
+      div.innerHTML = `<p>${qIdx + 1}. ${item.q}</p><div class="quiz-options" data-q="${qIdx}"></div>`;
+      const opts = div.querySelector('.quiz-options');
+      item.options.forEach((opt, oIdx) => {
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="radio" name="q${qIdx}" value="${oIdx}"><span>${opt}</span>`;
+        label.querySelector('input').addEventListener('change', () => {
+          quizAnswers[qIdx] = oIdx;
+          updateQuizProgress();
+        });
+        opts.appendChild(label);
+      });
+      quizContainer.appendChild(div);
+    });
+  }
+
+  function updateQuizProgress() {
+    const answered = Object.keys(quizAnswers).length;
+    document.getElementById('quiz-progress').style.width = (answered / quizData.length * 100) + '%';
+  }
+
+  document.getElementById('quiz-submit').addEventListener('click', () => {
+    if (Object.keys(quizAnswers).length < quizData.length) {
+      alert('Bitte beantworte alle Fragen.');
+      return;
+    }
+    let correct = 0;
+    quizData.forEach((item, qIdx) => {
+      const opts = document.querySelector(`[data-q="${qIdx}"]`).querySelectorAll('label');
+      const userAns = quizAnswers[qIdx];
+      opts.forEach((l, oIdx) => {
+        l.classList.remove('correct', 'wrong');
+        if (oIdx === item.correct) l.classList.add('correct');
+        else if (oIdx === userAns) l.classList.add('wrong');
+      });
+      if (userAns === item.correct) correct++;
+    });
+    document.getElementById('quiz-submit').style.display = 'none';
+    document.getElementById('score-box').classList.add('show');
+    document.getElementById('score-text').textContent = `${correct} / ${quizData.length}`;
+    const pct = correct / quizData.length;
+    document.getElementById('score-message').textContent =
+      pct === 1 ? 'Perfekt! Du beherrschst das Thema.' :
+      pct >= 0.75 ? 'Sehr gut! Noch ein paar Details wiederholen.' :
+      pct >= 0.5 ? 'Gut – schau dir Zeitstrahl und Karteikarten nochmal an.' :
+      'Übe weiter mit den anderen Modulen!';
+  });
+
+  document.getElementById('quiz-retry').addEventListener('click', renderQuiz);
+  renderQuiz();
+  </script>
+</body>
+</html>
